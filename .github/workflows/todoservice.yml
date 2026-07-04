@@ -1,0 +1,33 @@
+name: TodoService CI/CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'src/TodoService.API/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Restore packages
+        run: dotnet restore src/TodoService.API/TodoService.API.csproj
+
+      - name: Build
+        run: dotnet build src/TodoService.API/TodoService.API.csproj -c Release --no-restore
+
+      - name: Publish
+        run: dotnet publish src/TodoService.API/TodoService.API.csproj -c Release -o ./output/TodoService
+
+      - name: Deploy to local folder
+        shell: powershell
+        run: |
+          $dest = "C:\deployments\TodoService"
+          if (!(Test-Path $dest)) { New-Item -ItemType Directory -Path $dest -Force }
+          Copy-Item -Path "./output/TodoService/*" -Destination $dest -Recurse -Force
+          Write-Host "TodoService deployed successfully!"
