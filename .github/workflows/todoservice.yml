@@ -27,9 +27,8 @@ jobs:
       - name: Deploy to IIS
         shell: powershell
         run: |
-          Import-Module WebAdministration
-          Stop-WebSite -Name "TodoService"
+          iisreset /stop
           $dest = "C:\inetpub\wwwroot\TodoService"
           Copy-Item -Path "./output/TodoService/*" -Destination $dest -Recurse -Force
-          Start-WebSite -Name "TodoService"
-          Write-Host "TodoService deployed to IIS and restarted!"
+          iisreset /start
+          Write-Host "TodoService deployed and IIS restarted!"
