@@ -24,10 +24,12 @@ jobs:
       - name: Publish
         run: dotnet publish src/TodoService.API/TodoService.API.csproj -c Release -o ./output/TodoService
 
-      - name: Deploy to local folder
+      - name: Deploy to IIS
         shell: powershell
         run: |
-          $dest = "C:\deployments\TodoService"
-          if (!(Test-Path $dest)) { New-Item -ItemType Directory -Path $dest -Force }
+          Import-Module WebAdministration
+          Stop-WebSite -Name "TodoService"
+          $dest = "C:\inetpub\wwwroot\TodoService"
           Copy-Item -Path "./output/TodoService/*" -Destination $dest -Recurse -Force
-          Write-Host "TodoService deployed successfully!"
+          Start-WebSite -Name "TodoService"
+          Write-Host "TodoService deployed to IIS and restarted!"
